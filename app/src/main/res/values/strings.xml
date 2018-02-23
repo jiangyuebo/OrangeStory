@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">OrangeStory</string>
+
+    <string name="title_main">橙娃故事</string>
+    //tab
+    <string name="tab_title_home">听吧</string>
+    <string name="tab_title_find">发现</string>
+    <string name="tab_title_play">播放</string>
+    <string name="tab_title_user">用户</string>
+
+    //category name
+    <string name="category_name_tonghua">童话</string>
+    <string name="category_name_yuyan">寓言</string>
+    <string name="category_name_huiben">绘本</string>
+    <string name="category_name_shuiqian">睡前</string>
+    <string name="category_name_yingyu">英语</string>
+    <string name="category_name_guoxue">国学</string>
+    <string name="category_name_shenhua">神话</string>
+    <string name="category_name_mingzhu">名著</string>
+    <string name="category_name_baike">百科</string>
+    <string name="category_name_qita">其他</string>
+
+    //search
+    <string name="main_search_story">搜索故事</string>
+</resources>
