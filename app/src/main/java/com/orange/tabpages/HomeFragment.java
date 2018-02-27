@@ -1,6 +1,7 @@
 package com.orange.tabpages;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.media.Image;
 import android.net.Uri;
@@ -15,8 +16,12 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ViewFlipper;
 
 import com.google.gson.Gson;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.orange.bean.BannerBean;
 import com.orange.bean.MainPageDataJsonBean;
 import com.orange.bean.SeriasBean;
@@ -48,8 +53,8 @@ public class HomeFragment extends Fragment {
 
     //category image
     private static final int[] CATEGORY_IMAGE = {
-            R.drawable.tonghua,R.drawable.yuyan,R.drawable.shuiqian,R.drawable.guoxue,R.drawable.shenhua,
-            R.drawable.yingyu,R.drawable.baike,R.drawable.huiben,R.drawable.mingzhu,R.drawable.qita
+            R.drawable.tonghua, R.drawable.yuyan, R.drawable.shuiqian, R.drawable.guoxue, R.drawable.shenhua,
+            R.drawable.yingyu, R.drawable.baike, R.drawable.huiben, R.drawable.mingzhu, R.drawable.qita
     };
 
     // TODO: Rename parameter arguments, choose names that match
@@ -61,8 +66,7 @@ public class HomeFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    private AdapterViewFlipper adapterViewFlipper;
-    private ArrayList<ImageView> arrayBanner;
+    private ViewFlipper viewFlipper;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -96,7 +100,6 @@ public class HomeFragment extends Fragment {
 
         //从后台获取数据
         fetchDataFromServer();
-
     }
 
     @Override
@@ -106,32 +109,7 @@ public class HomeFragment extends Fragment {
         View homeFragmentView = inflater.inflate(R.layout.fragment_home, container, false);
 
         //AdapterViewFlipper
-        adapterViewFlipper = homeFragmentView.findViewById(R.id.main_banner);
-        //create adapter for flipper
-        BaseAdapter flipperAdapter = new BaseAdapter() {
-            @Override
-            public int getCount() {
-                return arrayBanner.size();
-            }
-
-            @Override
-            public Object getItem(int position) {
-                return position;
-            }
-
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-
-                return arrayBanner.get(position);
-            }
-        };
-
-        adapterViewFlipper.setAdapter(flipperAdapter);
+        viewFlipper = homeFragmentView.findViewById(R.id.main_banner);
 
         //reset view
         initView(homeFragmentView);
@@ -166,7 +144,7 @@ public class HomeFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
-    private void initView(View view){
+    private void initView(View view) {
 
         //collect category button
         LinearLayout category_first_line = view.findViewById(R.id.category_first_line_layout);
@@ -175,52 +153,38 @@ public class HomeFragment extends Fragment {
         ArrayList<Button> categoryButtonArray = new ArrayList<>();
 
         //first line
-        for (int i = 0;i < category_first_line.getChildCount();i++){
+        for (int i = 0; i < category_first_line.getChildCount(); i++) {
             //get button item
             Button category_button = (Button) category_first_line.getChildAt(i);
             categoryButtonArray.add(category_button);
         }
 
         //second line
-        for (int i = 0;i < category_second_line.getChildCount();i++){
+        for (int i = 0; i < category_second_line.getChildCount(); i++) {
             //get button item
             Button category_button = (Button) category_second_line.getChildAt(i);
             categoryButtonArray.add(category_button);
         }
 
-        for (int i = 0;i < categoryButtonArray.size();i++){
+        for (int i = 0; i < categoryButtonArray.size(); i++) {
             //resetting button image
             Drawable category_drawable = getContext().getResources().getDrawable(CATEGORY_IMAGE[i]);
-            category_drawable.setBounds(0,0,CATEGORY_WIDTH,CATEGORY_WIDTH);
+            category_drawable.setBounds(0, 0, CATEGORY_WIDTH, CATEGORY_WIDTH);
 
             //setting button image
             Button category_button = categoryButtonArray.get(i);
-            category_button.setCompoundDrawables(null,category_drawable,null,null);
+            category_button.setCompoundDrawables(null, category_drawable, null, null);
         }
 
         //search button resetting
         Drawable search = getContext().getResources().getDrawable(R.drawable.search);
-        search.setBounds(0,0,70,70);
+        search.setBounds(0, 0, 70, 70);
 
         Button searchButton = view.findViewById(R.id.main_search);
-        searchButton.setCompoundDrawables(search,null,null,null);
+        searchButton.setCompoundDrawables(search, null, null, null);
     }
 
-    private void fetchDataFromServer(){
-        //banner's data
-        arrayBanner = new ArrayList<>();
-        for (int i = 0;i < 3;i++){
-            ImageView bannerImageView = new ImageView(getContext());
-            bannerImageView.setImageResource(R.drawable.banner);
-            arrayBanner.add(bannerImageView);
-
-            bannerImageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d("Jerry","onClick ...");
-                }
-            });
-        }
+    private void fetchDataFromServer() {
 
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder().get().url(RequestConstants.URL_REQUEST_STORY + RequestConstants.URL_REQUEST_STORY_GET_INDEX).build();
@@ -229,7 +193,7 @@ public class HomeFragment extends Fragment {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.d("Jerry","request failure le");
+                Log.d("Jerry", "request failure le");
             }
 
             @Override
@@ -241,17 +205,40 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    private void parseData(String dataStr){
+    private void parseData(String dataStr) {
         final Gson gson = new Gson();
 
-        final MainPageDataJsonBean mainPageDataJsonBean = gson.fromJson(dataStr,MainPageDataJsonBean.class);
+        final MainPageDataJsonBean mainPageDataJsonBean = gson.fromJson(dataStr, MainPageDataJsonBean.class);
         ArrayList<BannerBean> bannerArray = mainPageDataJsonBean.getBanners();
         ArrayList<StoryBean> storyArray = mainPageDataJsonBean.getStories();
         ArrayList<SeriasBean> seriasArray = mainPageDataJsonBean.getSerias();
-        Log.d("Jerry","banners count : " + bannerArray.size());
-        Log.d("Jerry","storyArray count : " + storyArray.size());
-        Log.d("Jerry","seriasArray count : " + seriasArray.size());
+        Log.d("Jerry", "banners count : " + bannerArray.size());
+        Log.d("Jerry", "storyArray count : " + storyArray.size());
+        Log.d("Jerry", "seriasArray count : " + seriasArray.size());
+
+        //operate banner
+        final ImageLoader imageLoader = ImageLoader.getInstance();
+        final DisplayImageOptions options = new DisplayImageOptions.Builder()
+                .showImageOnLoading(R.drawable.nobanner)
+                .showImageOnFail(R.drawable.nobanner)
+                .showImageForEmptyUri(R.drawable.nobanner)
+                .build();
 
         //download banner image
+        for (int i = 0; i < bannerArray.size(); i++) {
+            BannerBean bannerBean = bannerArray.get(i);
+            final String logoURL = bannerBean.getLogoUrl();
+            Log.d("Jerry", "banner image url : " + logoURL);
+
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ImageView bannerImageView = new ImageView(getContext());
+                    imageLoader.displayImage(logoURL, bannerImageView, options);
+                    viewFlipper.addView(bannerImageView);
+                }
+            });
+
+        }
     }
 }

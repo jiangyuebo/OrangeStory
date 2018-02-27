@@ -4,10 +4,9 @@
     android:layout_height="match_parent"
     tools:context="com.orange.tabpages.PlayFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <ImageView
+        android:id="@+id/test_image"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Play page fragment" />
+        android:layout_height="160dp" />
 
 </FrameLayout>
